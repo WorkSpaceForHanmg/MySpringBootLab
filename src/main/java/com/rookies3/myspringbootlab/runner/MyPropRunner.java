@@ -42,7 +42,7 @@ public class MyPropRunner implements ApplicationRunner {
         logger.info("MyBootProperties getPort() = {}", properties.getPort());
         logger.info("설정된 Port 번호 = {}", environment.getProperty("local.server.port") );
 
-        logger.info("현재 활성화된 CustomerVO Bean = {}", myEnvironment);
+        logger.info("현재 활성화된 MyEnvironment Bean = {}", myEnvironment);
 
         // foo 라는 VM 아규먼트 있는지 확인
         logger.debug("VM 아규먼트 foo : {}", args.containsOption("foo"));
