@@ -2,7 +2,6 @@ package com.rookies3.myspringbootlab.repository;
 import com.rookies3.myspringbootlab.entity.Book;
 import com.rookies3.myspringbootlab.entity.BookDetail;
 import com.rookies3.myspringbootlab.entity.Publisher;
-import com.rookies3.myspringbootlab.repository.BookRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-public class BookRepositoryTest {
+public class BookDetailRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;

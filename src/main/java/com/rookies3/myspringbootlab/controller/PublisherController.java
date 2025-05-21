@@ -1,5 +1,6 @@
 package com.rookies3.myspringbootlab.controller;
 
+import com.rookies3.myspringbootlab.controller.dto.BookDTO;
 import com.rookies3.myspringbootlab.controller.dto.PublisherDTO;
 import com.rookies3.myspringbootlab.service.PublisherService;
 import jakarta.validation.Valid;
@@ -28,14 +29,14 @@ public class PublisherController {
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<PublisherDTO.SimpleResponse> getPublisherByName(@PathVariable String name) {
+    public ResponseEntity<PublisherDTO.Response> getPublisherByName(@PathVariable String name) {
         return ResponseEntity.ok(publisherService.getPublisherByName(name));
     }
 
     @PostMapping
-    public ResponseEntity<Void> createPublisher(@Valid @RequestBody PublisherDTO.Request request) {
-        Long id = publisherService.createPublisher(request);
-        return ResponseEntity.created(URI.create("/api/publishers/" + id)).build();
+    public ResponseEntity<PublisherDTO.Response> createPublisher(@Valid @RequestBody PublisherDTO.Request request) {
+        PublisherDTO.Response response = publisherService.createPublisher(request);
+        return ResponseEntity.created(URI.create("/api/publishers/" + response.getId())).body(response);
     }
 
     @PutMapping("/{id}")
@@ -49,5 +50,11 @@ public class PublisherController {
     public ResponseEntity<Void> deletePublisher(@PathVariable Long id) {
         publisherService.deletePublisher(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/books")
+    public ResponseEntity<List<BookDTO.Response>> getBooksByPublisher(@PathVariable Long id) {
+        List<BookDTO.Response> books = publisherService.getBooksByPublisher(id);
+        return ResponseEntity.ok(books);
     }
 }

@@ -18,8 +18,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findByTitleContainingIgnoreCase(String title);
 
-
-
     @Query("SELECT b FROM Book b JOIN FETCH b.bookDetail WHERE b.id = :id")
     Optional<Book> findByIdWithBookDetail(@Param("id") Long id);
 
@@ -28,9 +26,17 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     boolean existsByIsbn(String isbn);
 
-    //Publisher 관련 새로 추가된 메서드
+    // Publisher 관련
     List<Book> findByPublisherId(Long publisherId);
-    Long countByPublisherId(@Param("publisherId") Long publisherId);
-    Optional<Book> findByIdWithAllDetails(@Param("id") Long id);
 
+    Long countByPublisherId(@Param("publisherId") Long publisherId);
+
+    //bookDetail과 publisher 모두 fetch join
+    @Query("""
+        SELECT b FROM Book b 
+        LEFT JOIN FETCH b.bookDetail 
+        LEFT JOIN FETCH b.publisher 
+        WHERE b.id = :id
+    """)
+    Optional<Book> findByIdWithAllDetails(@Param("id") Long id);
 }

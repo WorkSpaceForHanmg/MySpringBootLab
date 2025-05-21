@@ -1,5 +1,6 @@
 package com.rookies3.myspringbootlab.service;
 
+import com.rookies3.myspringbootlab.controller.dto.BookDTO;
 import com.rookies3.myspringbootlab.controller.dto.PublisherDTO;
 import com.rookies3.myspringbootlab.entity.Publisher;
 import com.rookies3.myspringbootlab.repository.PublisherRepository;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +31,14 @@ public class PublisherService {
         return PublisherDTO.Response.fromEntity(publisher);
     }
 
-    public PublisherDTO.SimpleResponse getPublisherByName(String name) {
+    public PublisherDTO.Response getPublisherByName(String name) {
         Publisher publisher = publisherRepository.findByName(name)
                 .orElseThrow(() -> new EntityNotFoundException("Publisher not found with name: " + name));
-        return PublisherDTO.SimpleResponse.fromEntityWithCount(publisher, (long) publisher.getBooks().size());
+        return PublisherDTO.Response.fromEntity(publisher);
     }
 
     @Transactional
-    public Long createPublisher(PublisherDTO.Request request) {
+    public PublisherDTO.Response createPublisher(PublisherDTO.Request request) {
         if (publisherRepository.existsByName(request.getName())) {
             throw new IllegalArgumentException("Publisher with the same name already exists.");
         }
@@ -47,7 +49,8 @@ public class PublisherService {
                 .address(request.getAddress())
                 .build();
 
-        return publisherRepository.save(publisher).getId();
+        Publisher savedPublisher = publisherRepository.save(publisher);
+        return PublisherDTO.Response.fromEntity(savedPublisher);
     }
 
     @Transactional
@@ -75,5 +78,14 @@ public class PublisherService {
         }
 
         publisherRepository.delete(publisher);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookDTO.Response> getBooksByPublisher(Long publisherId) {
+        Publisher publisher = publisherRepository.findByIdWithBooks(publisherId)
+                .orElseThrow(() -> new EntityNotFoundException("Publisher not found with id: " + publisherId));
+        return publisher.getBooks().stream()
+                .map(BookDTO.Response::fromEntity)  // BookDTO.Response.fromEntity 메서드는 Book 엔티티 → DTO 변환
+                .collect(Collectors.toList());
     }
 }
