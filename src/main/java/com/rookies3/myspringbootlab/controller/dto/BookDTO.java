@@ -1,9 +1,17 @@
 package com.rookies3.myspringbootlab.controller.dto;
 
+import com.rookies3.myspringbootlab.controller.dto.PublisherDTO;
 import com.rookies3.myspringbootlab.entity.Book;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-import lombok.*;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -28,34 +36,14 @@ public class BookDTO {
         @PositiveOrZero(message = "Price must be positive or zero")
         private Integer price;
 
-        @Past(message = "Publish date must be in the past")
+        @PastOrPresent(message = "Publish date cannot be in the future")
         private LocalDate publishDate;
+
+        @NotNull(message = "Publisher ID is required")
+        private Long publisherId;
 
         @Valid
         private BookDetailDTO detailRequest;
-    }
-
-    // 부분 수정을 위한 새로운 DTO
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class PatchRequest {
-        private String title;
-        private String author;
-
-        @Pattern(regexp = "^(?=(?:\\D*\\d){10}(?:(?:\\D*\\d){3})?$)[\\d-]+$",
-                message = "ISBN must be valid (10 or 13 digits, with or without hyphens)")
-        private String isbn;
-
-        @PositiveOrZero(message = "Price must be positive or zero")
-        private Integer price;
-
-        @Past(message = "Publish date must be in the past")
-        private LocalDate publishDate;
-
-        @Valid
-        private BookDetailPatchRequest detailRequest;
     }
 
     @Data
@@ -65,21 +53,10 @@ public class BookDTO {
     public static class BookDetailDTO {
         private String description;
         private String language;
-        private Integer pageCount;
-        private String publisher;
-        private String coverImageUrl;
-        private String edition;
-    }
 
-    // BookDetail 부분 수정을 위한 DTO
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class BookDetailPatchRequest {
-        private String description;
-        private String language;
+        @PositiveOrZero(message = "Page count must be positive or zero")
         private Integer pageCount;
+
         private String publisher;
         private String coverImageUrl;
         private String edition;
@@ -96,9 +73,14 @@ public class BookDTO {
         private String isbn;
         private Integer price;
         private LocalDate publishDate;
+        private PublisherDTO.SimpleResponse publisher;
         private BookDetailResponse detail;
 
         public static Response fromEntity(Book book) {
+            PublisherDTO.SimpleResponse publisherResponse = book.getPublisher() != null
+                    ? PublisherDTO.SimpleResponse.fromEntity(book.getPublisher())
+                    : null;
+
             BookDetailResponse detailResponse = book.getBookDetail() != null
                     ? BookDetailResponse.builder()
                     .id(book.getBookDetail().getId())
@@ -118,7 +100,28 @@ public class BookDTO {
                     .isbn(book.getIsbn())
                     .price(book.getPrice())
                     .publishDate(book.getPublishDate())
+                    .publisher(publisherResponse)
                     .detail(detailResponse)
+                    .build();
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SimpleResponse {
+        private Long id;
+        private String title;
+        private String author;
+        private String isbn;
+
+        public static SimpleResponse fromEntity(Book book) {
+            return SimpleResponse.builder()
+                    .id(book.getId())
+                    .title(book.getTitle())
+                    .author(book.getAuthor())
+                    .isbn(book.getIsbn())
                     .build();
         }
     }
@@ -136,4 +139,45 @@ public class BookDTO {
         private String coverImageUrl;
         private String edition;
     }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PatchRequest {
+        private String title;
+        private String author;
+
+        @Pattern(regexp = "^(?=(?:\\D*\\d){10}(?:(?:\\D*\\d){3})?$)[\\d-]+$",
+                message = "ISBN must be valid (10 or 13 digits, with or without hyphens)")
+        private String isbn;
+
+        @PositiveOrZero(message = "Price must be positive or zero")
+        private Integer price;
+
+        @PastOrPresent(message = "Publish date cannot be in the future")
+        private LocalDate publishDate;
+
+        private Long publisherId;
+
+        @Valid
+        private BookDetailPatchRequest detailRequest;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookDetailPatchRequest {
+        private String description;
+        private String language;
+
+        @PositiveOrZero(message = "Page count must be positive or zero")
+        private Integer pageCount;
+
+        private String publisher;
+        private String coverImageUrl;
+        private String edition;
+    }
 }
+

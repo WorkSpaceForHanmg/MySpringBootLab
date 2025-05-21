@@ -2,8 +2,6 @@ package com.rookies3.myspringbootlab.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.DynamicUpdate;
-
 import java.time.LocalDate;
 
 @Entity
@@ -34,4 +32,9 @@ public class Book {
 
     @OneToOne(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BookDetail bookDetail;
+
+    //Publisher 연관관계 추가
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publisher_id") // FK 컬럼 이름
+    private Publisher publisher;
 }
