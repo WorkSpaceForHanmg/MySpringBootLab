@@ -1,18 +1,15 @@
 package com.rookies3.myspringbootlab.entity;
 
-
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
-
+import lombok.*;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "books")
-@Getter @Setter
-@DynamicUpdate
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Book {
 
     @Id
@@ -26,15 +23,18 @@ public class Book {
     @Column(nullable = false)
     private String author;
 
-    @Column(unique = true,nullable = false)
+    @Column(unique = true, nullable = false)
     private String isbn;
 
-    @Column(nullable = false)
-    @Positive    //가격 음수를 방지 하기 위함
     private Integer price;
 
-    @Column(nullable = false)
     private LocalDate publishDate;
 
+    @OneToOne(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private BookDetail bookDetail;
 
+    //Publisher 연관관계 추가
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publisher_id") // FK 컬럼 이름
+    private Publisher publisher;
 }
